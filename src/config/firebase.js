@@ -4,13 +4,6 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/
 
 // Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAksVje9u80MdctjHqqjzAk2pEcgg9qTj8",
-    authDomain: "nimo-76a15.firebaseapp.com",
-    projectId: "nimo-76a15",
-    storageBucket: "nimo-76a15.firebasestorage.app",
-    messagingSenderId: "466484695809",
-    appId: "1:466484695809:web:f16144e1e7c82f77118100",
-    measurementId: "G-T0CKCQ46ZX"
   };
 
 // Initialize Firebase
