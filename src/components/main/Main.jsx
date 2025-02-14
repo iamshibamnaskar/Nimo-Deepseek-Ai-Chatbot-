@@ -50,7 +50,7 @@ const Main = () => {
     setShowResults(true)
 
     try {
-      const response = await fetch("http://localhost:8000/query", {
+      const response = await fetch("http://34.171.12.222:8000/query", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +125,7 @@ const Main = () => {
             </div>
           </>
         ) : (
-          <div style={{height:"80vh",overflow:"auto",marginBottom:-120,minWidth:"70vw"}} ref={scrollRef}>
+          <div style={{ height: "80vh", overflow: "auto", marginBottom: -120, minWidth: "70vw" }} ref={scrollRef}>
             {
               data.map((d) => (
                 <div className="result">
@@ -144,10 +144,16 @@ const Main = () => {
                               code({ inline, className, children, ...props }) {
                                 const match = /language-(\w+)/.exec(className || "");
                                 return !inline && match ? (
-                                  <div className="relative group my-4">
+                                  <div style={{ position: "relative", margin: "16px 0" }}>
                                     <Copy
                                       size={14}
-                                      className="absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-white"
+                                      style={{
+                                        position: "absolute",
+                                        top: "8px",
+                                        right: "8px",
+                                        cursor: "pointer",
+                                        color: "#718096", // Dark Gray
+                                      }}
                                       onClick={() => navigator.clipboard.writeText(String(children).trim())}
                                     />
                                     <SyntaxHighlighter
@@ -160,41 +166,124 @@ const Main = () => {
                                     </SyntaxHighlighter>
                                   </div>
                                 ) : (
-                                  <code className="bg-gray-700 text-white text-lg px-3 py-1 rounded mx-1">
+                                  <code
+                                    style={{
+                                      backgroundColor: "#1A202C", // Darker Gray
+                                      color: "#E2E8F0", // Lighter Text
+                                      fontSize: "16px",
+                                      padding: "4px 8px",
+                                      borderRadius: "4px",
+                                      margin: "0 4px",
+                                    }}
+                                  >
                                     {children}
                                   </code>
                                 );
                               },
                               h1: ({ node, ...props }) => (
-                                <h1 className="text-3xl font-bold text-blue-400 mt-6 mb-4">{props.children}</h1>
+                                <h1
+                                  style={{
+                                    fontSize: "2rem",
+                                    fontWeight: "bold",
+                                    color: "#2C5282", // Dark Blue
+                                    marginTop: "24px",
+                                    marginBottom: "20px",
+                                    lineHeight: "1.5",
+                                  }}
+                                >
+                                  {props.children}
+                                </h1>
                               ),
                               h2: ({ node, ...props }) => (
-                                <h2 className="text-2xl font-semibold text-blue-300 mt-5 mb-3">{props.children}</h2>
+                                <h2
+                                  style={{
+                                    fontSize: "1.75rem",
+                                    fontWeight: "600",
+                                    color: "#2B6CB0", // Darker Blue
+                                    marginTop: "22px",
+                                    marginBottom: "18px",
+                                    lineHeight: "1.5",
+                                  }}
+                                >
+                                  {props.children}
+                                </h2>
                               ),
                               strong: ({ node, ...props }) => (
-                                <strong className="text-yellow-300 font-semibold">{props.children}</strong>
+                                <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
                               ),
                               em: ({ node, ...props }) => (
-                                <em className="text-green-300 italic">{props.children}</em>
+                                <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
                               ),
                               p: ({ node, ...props }) => (
-                                <p className="text-gray-300 leading-loose my-3">{props.children}</p>
+                                <p
+                                  style={{
+                                    color: "#56728f",
+                                    lineHeight: "1.8", // Increased spacing between lines
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                  }}
+                                >
+                                  {props.children}
+                                </p>
                               ),
                               ul: ({ node, ...props }) => (
-                                <ul className="list-disc list-inside text-gray-300 space-y-2 my-3">{props.children}</ul>
+                                <ul
+                                  style={{
+                                    listStyleType: "disc",
+                                    paddingLeft: "24px",
+                                    color: "#A0AEC0",
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
+                                  {props.children}
+                                </ul>
                               ),
                               ol: ({ node, ...props }) => (
-                                <ol className="list-decimal list-inside text-gray-300 space-y-2 my-3">{props.children}</ol>
+                                <ol
+                                  style={{
+                                    listStyleType: "decimal",
+                                    paddingLeft: "24px",
+                                    color: "#5c708a",
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
+                                  {props.children}
+                                </ol>
+                              ),
+                              li: ({ node, ...props }) => (
+                                <li
+                                  style={{
+                                    marginBottom: "8px", // Extra spacing between list items
+                                  }}
+                                >
+                                  {props.children}
+                                </li>
                               ),
                               blockquote: ({ node, ...props }) => (
-                                <blockquote className="border-l-4 border-blue-500 pl-5 italic text-gray-400 my-4">
+                                <blockquote
+                                  style={{
+                                    borderLeft: "4px solid #2C5282", // Dark Blue Border
+                                    paddingLeft: "20px",
+                                    fontStyle: "italic",
+                                    color: "#718096", // Dark Gray Text
+                                    marginTop: "18px",
+                                    marginBottom: "18px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
                                   {props.children}
                                 </blockquote>
                               ),
                             }}
                           >
-                            {d['msg']}
+                            {d["msg"]}
                           </Markdown>
+
+
 
 
                         </div>
@@ -213,7 +302,7 @@ const Main = () => {
               <div className="result-data">
                 {result.length > 0 ? (<img src={assets.chatbot} alt="" />) : (<div></div>)}
                 {loading ? (
-                  <RiseLoader color="#dac013" size={15} style={{marginTop:30}} />
+                  <RiseLoader color="#dac013" size={15} style={{ marginTop: 30 }} />
                 ) : (
                   <div>
                     <Markdown
@@ -221,10 +310,16 @@ const Main = () => {
                               code({ inline, className, children, ...props }) {
                                 const match = /language-(\w+)/.exec(className || "");
                                 return !inline && match ? (
-                                  <div className="relative group my-4">
+                                  <div style={{ position: "relative", margin: "16px 0" }}>
                                     <Copy
                                       size={14}
-                                      className="absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-white"
+                                      style={{
+                                        position: "absolute",
+                                        top: "8px",
+                                        right: "8px",
+                                        cursor: "pointer",
+                                        color: "#718096", // Dark Gray
+                                      }}
                                       onClick={() => navigator.clipboard.writeText(String(children).trim())}
                                     />
                                     <SyntaxHighlighter
@@ -237,34 +332,115 @@ const Main = () => {
                                     </SyntaxHighlighter>
                                   </div>
                                 ) : (
-                                  <code className="bg-gray-700 text-white text-lg px-3 py-1 rounded mx-1">
+                                  <code
+                                    style={{
+                                      backgroundColor: "#1A202C", // Darker Gray
+                                      color: "#E2E8F0", // Lighter Text
+                                      fontSize: "16px",
+                                      padding: "4px 8px",
+                                      borderRadius: "4px",
+                                      margin: "0 4px",
+                                    }}
+                                  >
                                     {children}
                                   </code>
                                 );
                               },
                               h1: ({ node, ...props }) => (
-                                <h1 className="text-3xl font-bold text-blue-400 mt-6 mb-4">{props.children}</h1>
+                                <h1
+                                  style={{
+                                    fontSize: "2rem",
+                                    fontWeight: "bold",
+                                    color: "#2C5282", // Dark Blue
+                                    marginTop: "24px",
+                                    marginBottom: "20px",
+                                    lineHeight: "1.5",
+                                  }}
+                                >
+                                  {props.children}
+                                </h1>
                               ),
                               h2: ({ node, ...props }) => (
-                                <h2 className="text-2xl font-semibold text-blue-300 mt-5 mb-3">{props.children}</h2>
+                                <h2
+                                  style={{
+                                    fontSize: "1.75rem",
+                                    fontWeight: "600",
+                                    color: "#2B6CB0", // Darker Blue
+                                    marginTop: "22px",
+                                    marginBottom: "18px",
+                                    lineHeight: "1.5",
+                                  }}
+                                >
+                                  {props.children}
+                                </h2>
                               ),
                               strong: ({ node, ...props }) => (
-                                <strong className="text-yellow-300 font-semibold">{props.children}</strong>
+                                <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
                               ),
                               em: ({ node, ...props }) => (
-                                <em className="text-green-300 italic">{props.children}</em>
+                                <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
                               ),
                               p: ({ node, ...props }) => (
-                                <p className="text-gray-300 leading-loose my-3">{props.children}</p>
+                                <p
+                                  style={{
+                                    color: "#56728f",
+                                    lineHeight: "1.8", // Increased spacing between lines
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                  }}
+                                >
+                                  {props.children}
+                                </p>
                               ),
                               ul: ({ node, ...props }) => (
-                                <ul className="list-disc list-inside text-gray-300 space-y-2 my-3">{props.children}</ul>
+                                <ul
+                                  style={{
+                                    listStyleType: "disc",
+                                    paddingLeft: "24px",
+                                    color: "#A0AEC0",
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
+                                  {props.children}
+                                </ul>
                               ),
                               ol: ({ node, ...props }) => (
-                                <ol className="list-decimal list-inside text-gray-300 space-y-2 my-3">{props.children}</ol>
+                                <ol
+                                  style={{
+                                    listStyleType: "decimal",
+                                    paddingLeft: "24px",
+                                    color: "#5c708a",
+                                    marginTop: "14px",
+                                    marginBottom: "14px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
+                                  {props.children}
+                                </ol>
+                              ),
+                              li: ({ node, ...props }) => (
+                                <li
+                                  style={{
+                                    marginBottom: "8px", // Extra spacing between list items
+                                  }}
+                                >
+                                  {props.children}
+                                </li>
                               ),
                               blockquote: ({ node, ...props }) => (
-                                <blockquote className="border-l-4 border-blue-500 pl-5 italic text-gray-400 my-4">
+                                <blockquote
+                                  style={{
+                                    borderLeft: "4px solid #2C5282", // Dark Blue Border
+                                    paddingLeft: "20px",
+                                    fontStyle: "italic",
+                                    color: "#718096", // Dark Gray Text
+                                    marginTop: "18px",
+                                    marginBottom: "18px",
+                                    lineHeight: "1.8", // Added spacing
+                                  }}
+                                >
                                   {props.children}
                                 </blockquote>
                               ),
@@ -289,6 +465,12 @@ const Main = () => {
               value={input}
               type="text"
               placeholder="Enter the Prompt Here"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault(); // Prevents new lines in textarea
+                  onSent(); // Call onSent() when Enter is pressed
+                }
+              }}
             />
             <div>
               <img
@@ -302,7 +484,7 @@ const Main = () => {
           </div>
           <div className="bottom-info">
             <p>
-              Nimo sometimes may display inaccurate info, including about people, so double-check its responses.
+              Nimo sometimes may display inaccurate info, including about people, so double-check its responses.|| made by shibam @2025
             </p>
           </div>
         </div>
