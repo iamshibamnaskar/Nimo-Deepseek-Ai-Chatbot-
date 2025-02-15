@@ -50,7 +50,7 @@ const Main = () => {
     setShowResults(true)
 
     try {
-      const response = await fetch("https://shibam.hopto.org/query", {
+      const response = await fetch("https://customers-personals-cultural-configurations.trycloudflare.com/query", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
