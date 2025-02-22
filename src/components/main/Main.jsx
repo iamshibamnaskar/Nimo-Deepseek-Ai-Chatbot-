@@ -7,7 +7,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { Copy } from "lucide-react";
 import { lucario } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { RiseLoader } from "react-spinners";
+import { SyncLoader } from "react-spinners";
 
 const Main = () => {
   const [showResults, setShowResults] = useState(false);
@@ -36,6 +36,7 @@ const Main = () => {
 
   const onSent = async () => {
     // console.log(data)
+    
     let dd = data
     dd.push({
       id: 0,
@@ -65,7 +66,7 @@ const Main = () => {
         const decoder = new TextDecoder();
         let done = false;
         let think = true;
-        setLoading(false);
+        
         let final = ""
 
         // Read the stream and concatenate chunks in real-time
@@ -73,6 +74,10 @@ const Main = () => {
           const { value, done: readerDone } = await reader.read();
           done = readerDone;
           const chunk = decoder.decode(value, { stream: true });
+          if (chunk != "") {
+            setLoading(false);
+            
+          }
           if (chunk == "</think>") {
             think = false
             setResult("")
@@ -125,7 +130,8 @@ const Main = () => {
             </div>
           </>
         ) : (
-          <div style={{ height: "80vh", overflow: "auto", marginBottom: -120, minWidth: "70vw" }} ref={scrollRef}>
+          <>
+          <div style={{ height: "75vh", overflow: "auto", minWidth: "70vw",scrollbarWidth:'thin',scrollbarColor:'inherit' }} ref={scrollRef}>
             {
               data.map((d) => (
                 <div className="result">
@@ -302,7 +308,7 @@ const Main = () => {
               <div className="result-data">
                 {result.length > 0 ? (<img src={assets.chatbot} alt="" />) : (<div></div>)}
                 {loading ? (
-                  <RiseLoader color="#dac013" size={15} style={{ marginTop: 30 }} />
+                  <div style={{ height:50 }}><SyncLoader color="#f3aa00" size={10} style={{zIndex:1 }} /></div>
                 ) : (
                   <div>
                     <Markdown
@@ -454,6 +460,7 @@ const Main = () => {
               </div>
             </div>
           </div>
+          </>
         )}
 
         <div className="main-bottom">

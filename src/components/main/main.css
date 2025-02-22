@@ -1,8 +1,7 @@
 .main{
     flex: 1;
     min-height: 100vh;
-    padding-bottom: 25vh;
-    position: relative;
+    padding-bottom: 0vh;
 }
 .main .nav{
     display: flex;
@@ -19,7 +18,6 @@
 .main-container{
     max-width: 900px;
     margin: auto;
-    display: flex;
 }
 .main-container .greet{
     margin-left: 6vh;
@@ -63,8 +61,7 @@
     background-color: #dfe4ea;
 }
 .main-bottom {
-    position: absolute;
-    bottom: 0;
+    height: 10vh;
     width: 100%;
     max-width: 900px;
     padding: 0px 20px;
