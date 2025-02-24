@@ -44,8 +44,8 @@ const Main = () => {
 
       const result = await response.json();
       Setextracting(false)
-      // Setextext(result['extracted_markdown'])
-      console.log("API Response:", result);
+      Setextext(result['extracted_markdown'])
+      // console.log("API Response:", result);
     } catch (error) {
       Setextracting(false)
       console.error("Upload Error:", error);
