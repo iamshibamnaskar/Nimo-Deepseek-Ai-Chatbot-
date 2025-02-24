@@ -19,6 +19,39 @@ const Main = () => {
   const [user, setUser] = useState(null);
 
   const scrollRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [extracting, Setextracting] = useState(false);
+  const [extext, Setextext] = useState("")
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      uploadImage(file);
+    }
+  };
+
+  const uploadImage = async (file) => {
+    Setextracting(true)
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`https://imgtotxt.shibamnaskar.in/extract_text/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      Setextracting(false)
+      // Setextext(result['extracted_markdown'])
+      console.log("API Response:", result);
+    } catch (error) {
+      Setextracting(false)
+      console.error("Upload Error:", error);
+    }
+  };
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -36,11 +69,13 @@ const Main = () => {
 
   const onSent = async () => {
     // console.log(data)
-    
+    const imageUrl = selectedFile != null ? URL.createObjectURL(selectedFile) : null;
+
     let dd = data
     dd.push({
       id: 0,
-      msg: input
+      msg: input,
+      img: imageUrl
     })
     setData(dd)
     setInput("")
@@ -57,7 +92,7 @@ const Main = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: input,
+          message: `${extext} ${input}`,
         }),
       });
 
@@ -66,7 +101,7 @@ const Main = () => {
         const decoder = new TextDecoder();
         let done = false;
         let think = true;
-        
+
         let final = ""
 
         // Read the stream and concatenate chunks in real-time
@@ -76,7 +111,7 @@ const Main = () => {
           const chunk = decoder.decode(value, { stream: true });
           if (chunk != "") {
             setLoading(false);
-            
+
           }
           if (chunk == "</think>") {
             think = false
@@ -106,9 +141,13 @@ const Main = () => {
         setLoading(false);
         // console.error("Stream failed");
       }
+      Setextext("")
+      setSelectedFile(null)
     } catch (error) {
       // console.error("Error during API call:", error);
+      Setextext("")
       setLoading(false);
+      setSelectedFile(null)
     }
   };
 
@@ -131,335 +170,352 @@ const Main = () => {
           </>
         ) : (
           <>
-          <div style={{ height: "75vh", overflow: "auto", minWidth: "70vw",scrollbarWidth:'thin',scrollbarColor:'inherit' }} ref={scrollRef}>
-            {
-              data.map((d) => (
-                <div className="result">
-                  {
-                    d['id'] == 0 ? (
-                      <div className="result-title">
-                        <img src={user?.photoURL} alt="" />
-                        <p>{d['msg']}</p>
-                      </div>
-                    ) : (
-                      <div className="result-data">
-                        <img style={{ width: 70 }} src={assets.chatbot} alt="" />
-                        <div>
-                          <Markdown
-                            components={{
-                              code({ inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || "");
-                                return !inline && match ? (
-                                  <div style={{ position: "relative", margin: "16px 0" }}>
-                                    <Copy
-                                      size={14}
+            <div style={{ height: "75vh", overflow: "auto", minWidth: "70vw", scrollbarWidth: 'thin', scrollbarColor: 'inherit' }} ref={scrollRef}>
+              {
+                data.map((d) => (
+                  <div className="result">
+                    {
+                      d['id'] == 0 ? (
+                        <div className="result-title">
+                          <img src={user?.photoURL} alt="" />
+                          <div>
+                            {
+                              d['img']!=null &&<img
+                              src={d['img']}
+                              alt="Uploaded Preview"
+                              style={{
+                                width: "200px",
+                                objectFit: "cover",
+                                borderRadius: "10px",
+                                backgroundColor: "#f0f0f0",
+                                padding: "5px",
+                                border: "1px solid #ddd"
+                              }}
+                            />
+                            }
+
+                            <p>{d['msg']}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="result-data">
+                          <img style={{ width: 70 }} src={assets.chatbot} alt="" />
+                          <div>
+                            <Markdown
+                              components={{
+                                code({ inline, className, children, ...props }) {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  return !inline && match ? (
+                                    <div style={{ position: "relative", margin: "16px 0" }}>
+                                      <Copy
+                                        size={14}
+                                        style={{
+                                          position: "absolute",
+                                          top: "8px",
+                                          right: "8px",
+                                          cursor: "pointer",
+                                          color: "#718096", // Dark Gray
+                                        }}
+                                        onClick={() => navigator.clipboard.writeText(String(children).trim())}
+                                      />
+                                      <SyntaxHighlighter
+                                        style={lucario}
+                                        language={match[1]}
+                                        PreTag="div"
+                                        className="bg-gray-800 text-lg p-5 rounded-lg leading-relaxed"
+                                      >
+                                        {String(children).trim()}
+                                      </SyntaxHighlighter>
+                                    </div>
+                                  ) : (
+                                    <code
                                       style={{
-                                        position: "absolute",
-                                        top: "8px",
-                                        right: "8px",
-                                        cursor: "pointer",
-                                        color: "#718096", // Dark Gray
+                                        backgroundColor: "#1A202C", // Darker Gray
+                                        color: "#E2E8F0", // Lighter Text
+                                        fontSize: "16px",
+                                        padding: "4px 8px",
+                                        borderRadius: "4px",
+                                        margin: "0 4px",
                                       }}
-                                      onClick={() => navigator.clipboard.writeText(String(children).trim())}
-                                    />
-                                    <SyntaxHighlighter
-                                      style={lucario}
-                                      language={match[1]}
-                                      PreTag="div"
-                                      className="bg-gray-800 text-lg p-5 rounded-lg leading-relaxed"
                                     >
-                                      {String(children).trim()}
-                                    </SyntaxHighlighter>
-                                  </div>
-                                ) : (
-                                  <code
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                                h1: ({ node, ...props }) => (
+                                  <h1
                                     style={{
-                                      backgroundColor: "#1A202C", // Darker Gray
-                                      color: "#E2E8F0", // Lighter Text
-                                      fontSize: "16px",
-                                      padding: "4px 8px",
-                                      borderRadius: "4px",
-                                      margin: "0 4px",
+                                      fontSize: "2rem",
+                                      fontWeight: "bold",
+                                      color: "#2C5282", // Dark Blue
+                                      marginTop: "24px",
+                                      marginBottom: "20px",
+                                      lineHeight: "1.5",
                                     }}
                                   >
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              h1: ({ node, ...props }) => (
-                                <h1
-                                  style={{
-                                    fontSize: "2rem",
-                                    fontWeight: "bold",
-                                    color: "#2C5282", // Dark Blue
-                                    marginTop: "24px",
-                                    marginBottom: "20px",
-                                    lineHeight: "1.5",
-                                  }}
-                                >
-                                  {props.children}
-                                </h1>
-                              ),
-                              h2: ({ node, ...props }) => (
-                                <h2
-                                  style={{
-                                    fontSize: "1.75rem",
-                                    fontWeight: "600",
-                                    color: "#2B6CB0", // Darker Blue
-                                    marginTop: "22px",
-                                    marginBottom: "18px",
-                                    lineHeight: "1.5",
-                                  }}
-                                >
-                                  {props.children}
-                                </h2>
-                              ),
-                              strong: ({ node, ...props }) => (
-                                <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
-                              ),
-                              em: ({ node, ...props }) => (
-                                <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
-                              ),
-                              p: ({ node, ...props }) => (
-                                <p
-                                  style={{
-                                    color: "#56728f",
-                                    lineHeight: "1.8", // Increased spacing between lines
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                  }}
-                                >
-                                  {props.children}
-                                </p>
-                              ),
-                              ul: ({ node, ...props }) => (
-                                <ul
-                                  style={{
-                                    listStyleType: "disc",
-                                    paddingLeft: "24px",
-                                    color: "#A0AEC0",
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </ul>
-                              ),
-                              ol: ({ node, ...props }) => (
-                                <ol
-                                  style={{
-                                    listStyleType: "decimal",
-                                    paddingLeft: "24px",
-                                    color: "#5c708a",
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </ol>
-                              ),
-                              li: ({ node, ...props }) => (
-                                <li
-                                  style={{
-                                    marginBottom: "8px", // Extra spacing between list items
-                                  }}
-                                >
-                                  {props.children}
-                                </li>
-                              ),
-                              blockquote: ({ node, ...props }) => (
-                                <blockquote
-                                  style={{
-                                    borderLeft: "4px solid #2C5282", // Dark Blue Border
-                                    paddingLeft: "20px",
-                                    fontStyle: "italic",
-                                    color: "#718096", // Dark Gray Text
-                                    marginTop: "18px",
-                                    marginBottom: "18px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </blockquote>
-                              ),
-                            }}
-                          >
-                            {d["msg"]}
-                          </Markdown>
+                                    {props.children}
+                                  </h1>
+                                ),
+                                h2: ({ node, ...props }) => (
+                                  <h2
+                                    style={{
+                                      fontSize: "1.75rem",
+                                      fontWeight: "600",
+                                      color: "#2B6CB0", // Darker Blue
+                                      marginTop: "22px",
+                                      marginBottom: "18px",
+                                      lineHeight: "1.5",
+                                    }}
+                                  >
+                                    {props.children}
+                                  </h2>
+                                ),
+                                strong: ({ node, ...props }) => (
+                                  <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
+                                ),
+                                em: ({ node, ...props }) => (
+                                  <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
+                                ),
+                                p: ({ node, ...props }) => (
+                                  <p
+                                    style={{
+                                      color: "#56728f",
+                                      lineHeight: "1.8", // Increased spacing between lines
+                                      marginTop: "14px",
+                                      marginBottom: "14px",
+                                    }}
+                                  >
+                                    {props.children}
+                                  </p>
+                                ),
+                                ul: ({ node, ...props }) => (
+                                  <ul
+                                    style={{
+                                      listStyleType: "disc",
+                                      paddingLeft: "24px",
+                                      color: "#A0AEC0",
+                                      marginTop: "14px",
+                                      marginBottom: "14px",
+                                      lineHeight: "1.8", // Added spacing
+                                    }}
+                                  >
+                                    {props.children}
+                                  </ul>
+                                ),
+                                ol: ({ node, ...props }) => (
+                                  <ol
+                                    style={{
+                                      listStyleType: "decimal",
+                                      paddingLeft: "24px",
+                                      color: "#5c708a",
+                                      marginTop: "14px",
+                                      marginBottom: "14px",
+                                      lineHeight: "1.8", // Added spacing
+                                    }}
+                                  >
+                                    {props.children}
+                                  </ol>
+                                ),
+                                li: ({ node, ...props }) => (
+                                  <li
+                                    style={{
+                                      marginBottom: "8px", // Extra spacing between list items
+                                    }}
+                                  >
+                                    {props.children}
+                                  </li>
+                                ),
+                                blockquote: ({ node, ...props }) => (
+                                  <blockquote
+                                    style={{
+                                      borderLeft: "4px solid #2C5282", // Dark Blue Border
+                                      paddingLeft: "20px",
+                                      fontStyle: "italic",
+                                      color: "#718096", // Dark Gray Text
+                                      marginTop: "18px",
+                                      marginBottom: "18px",
+                                      lineHeight: "1.8", // Added spacing
+                                    }}
+                                  >
+                                    {props.children}
+                                  </blockquote>
+                                ),
+                              }}
+                            >
+                              {d["msg"]}
+                            </Markdown>
 
 
 
 
+                          </div>
                         </div>
-                      </div>
-                    )
-                  }
+                      )
+                    }
 
-                </div>
-              ))
-            }
-            <div className="result">
-              {/* <div className="result-title">
+                  </div>
+                ))
+              }
+              <div className="result">
+                {/* <div className="result-title">
                 <img src={assets.user} alt="" />
                 <p>{input}</p>
               </div> */}
-              <div className="result-data">
-                {result.length > 0 ? (<img src={assets.chatbot} alt="" />) : (<div></div>)}
-                {loading ? (
-                  <div style={{ height:50 }}><SyncLoader color="#f3aa00" size={10} style={{zIndex:1 }} /></div>
-                ) : (
-                  <div>
-                    <Markdown
-                            components={{
-                              code({ inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || "");
-                                return !inline && match ? (
-                                  <div style={{ position: "relative", margin: "16px 0" }}>
-                                    <Copy
-                                      size={14}
-                                      style={{
-                                        position: "absolute",
-                                        top: "8px",
-                                        right: "8px",
-                                        cursor: "pointer",
-                                        color: "#718096", // Dark Gray
-                                      }}
-                                      onClick={() => navigator.clipboard.writeText(String(children).trim())}
-                                    />
-                                    <SyntaxHighlighter
-                                      style={lucario}
-                                      language={match[1]}
-                                      PreTag="div"
-                                      className="bg-gray-800 text-lg p-5 rounded-lg leading-relaxed"
-                                    >
-                                      {String(children).trim()}
-                                    </SyntaxHighlighter>
-                                  </div>
-                                ) : (
-                                  <code
-                                    style={{
-                                      backgroundColor: "#1A202C", // Darker Gray
-                                      color: "#E2E8F0", // Lighter Text
-                                      fontSize: "16px",
-                                      padding: "4px 8px",
-                                      borderRadius: "4px",
-                                      margin: "0 4px",
-                                    }}
-                                  >
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              h1: ({ node, ...props }) => (
-                                <h1
+                <div className="result-data">
+                  {result.length > 0 ? (<img src={assets.chatbot} alt="" />) : (<div></div>)}
+                  {loading ? (
+                    <div style={{ height: 50 }}><SyncLoader color="#f3aa00" size={10} style={{ zIndex: 1 }} /></div>
+                  ) : (
+                    <div>
+                      <Markdown
+                        components={{
+                          code({ inline, className, children, ...props }) {
+                            const match = /language-(\w+)/.exec(className || "");
+                            return !inline && match ? (
+                              <div style={{ position: "relative", margin: "16px 0" }}>
+                                <Copy
+                                  size={14}
                                   style={{
-                                    fontSize: "2rem",
-                                    fontWeight: "bold",
-                                    color: "#2C5282", // Dark Blue
-                                    marginTop: "24px",
-                                    marginBottom: "20px",
-                                    lineHeight: "1.5",
+                                    position: "absolute",
+                                    top: "8px",
+                                    right: "8px",
+                                    cursor: "pointer",
+                                    color: "#718096", // Dark Gray
                                   }}
+                                  onClick={() => navigator.clipboard.writeText(String(children).trim())}
+                                />
+                                <SyntaxHighlighter
+                                  style={lucario}
+                                  language={match[1]}
+                                  PreTag="div"
+                                  className="bg-gray-800 text-lg p-5 rounded-lg leading-relaxed"
                                 >
-                                  {props.children}
-                                </h1>
-                              ),
-                              h2: ({ node, ...props }) => (
-                                <h2
-                                  style={{
-                                    fontSize: "1.75rem",
-                                    fontWeight: "600",
-                                    color: "#2B6CB0", // Darker Blue
-                                    marginTop: "22px",
-                                    marginBottom: "18px",
-                                    lineHeight: "1.5",
-                                  }}
-                                >
-                                  {props.children}
-                                </h2>
-                              ),
-                              strong: ({ node, ...props }) => (
-                                <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
-                              ),
-                              em: ({ node, ...props }) => (
-                                <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
-                              ),
-                              p: ({ node, ...props }) => (
-                                <p
-                                  style={{
-                                    color: "#56728f",
-                                    lineHeight: "1.8", // Increased spacing between lines
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                  }}
-                                >
-                                  {props.children}
-                                </p>
-                              ),
-                              ul: ({ node, ...props }) => (
-                                <ul
-                                  style={{
-                                    listStyleType: "disc",
-                                    paddingLeft: "24px",
-                                    color: "#A0AEC0",
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </ul>
-                              ),
-                              ol: ({ node, ...props }) => (
-                                <ol
-                                  style={{
-                                    listStyleType: "decimal",
-                                    paddingLeft: "24px",
-                                    color: "#5c708a",
-                                    marginTop: "14px",
-                                    marginBottom: "14px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </ol>
-                              ),
-                              li: ({ node, ...props }) => (
-                                <li
-                                  style={{
-                                    marginBottom: "8px", // Extra spacing between list items
-                                  }}
-                                >
-                                  {props.children}
-                                </li>
-                              ),
-                              blockquote: ({ node, ...props }) => (
-                                <blockquote
-                                  style={{
-                                    borderLeft: "4px solid #2C5282", // Dark Blue Border
-                                    paddingLeft: "20px",
-                                    fontStyle: "italic",
-                                    color: "#718096", // Dark Gray Text
-                                    marginTop: "18px",
-                                    marginBottom: "18px",
-                                    lineHeight: "1.8", // Added spacing
-                                  }}
-                                >
-                                  {props.children}
-                                </blockquote>
-                              ),
-                            }}
-                          >
-                            {result}
-                          </Markdown>
+                                  {String(children).trim()}
+                                </SyntaxHighlighter>
+                              </div>
+                            ) : (
+                              <code
+                                style={{
+                                  backgroundColor: "#1A202C", // Darker Gray
+                                  color: "#E2E8F0", // Lighter Text
+                                  fontSize: "16px",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  margin: "0 4px",
+                                }}
+                              >
+                                {children}
+                              </code>
+                            );
+                          },
+                          h1: ({ node, ...props }) => (
+                            <h1
+                              style={{
+                                fontSize: "2rem",
+                                fontWeight: "bold",
+                                color: "#2C5282", // Dark Blue
+                                marginTop: "24px",
+                                marginBottom: "20px",
+                                lineHeight: "1.5",
+                              }}
+                            >
+                              {props.children}
+                            </h1>
+                          ),
+                          h2: ({ node, ...props }) => (
+                            <h2
+                              style={{
+                                fontSize: "1.75rem",
+                                fontWeight: "600",
+                                color: "#2B6CB0", // Darker Blue
+                                marginTop: "22px",
+                                marginBottom: "18px",
+                                lineHeight: "1.5",
+                              }}
+                            >
+                              {props.children}
+                            </h2>
+                          ),
+                          strong: ({ node, ...props }) => (
+                            <strong style={{ color: "#D69E2E", fontWeight: "600" }}>{props.children}</strong> // Dark Yellow
+                          ),
+                          em: ({ node, ...props }) => (
+                            <em style={{ color: "#2F855A", fontStyle: "italic" }}>{props.children}</em> // Dark Green
+                          ),
+                          p: ({ node, ...props }) => (
+                            <p
+                              style={{
+                                color: "#56728f",
+                                lineHeight: "1.8", // Increased spacing between lines
+                                marginTop: "14px",
+                                marginBottom: "14px",
+                              }}
+                            >
+                              {props.children}
+                            </p>
+                          ),
+                          ul: ({ node, ...props }) => (
+                            <ul
+                              style={{
+                                listStyleType: "disc",
+                                paddingLeft: "24px",
+                                color: "#A0AEC0",
+                                marginTop: "14px",
+                                marginBottom: "14px",
+                                lineHeight: "1.8", // Added spacing
+                              }}
+                            >
+                              {props.children}
+                            </ul>
+                          ),
+                          ol: ({ node, ...props }) => (
+                            <ol
+                              style={{
+                                listStyleType: "decimal",
+                                paddingLeft: "24px",
+                                color: "#5c708a",
+                                marginTop: "14px",
+                                marginBottom: "14px",
+                                lineHeight: "1.8", // Added spacing
+                              }}
+                            >
+                              {props.children}
+                            </ol>
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li
+                              style={{
+                                marginBottom: "8px", // Extra spacing between list items
+                              }}
+                            >
+                              {props.children}
+                            </li>
+                          ),
+                          blockquote: ({ node, ...props }) => (
+                            <blockquote
+                              style={{
+                                borderLeft: "4px solid #2C5282", // Dark Blue Border
+                                paddingLeft: "20px",
+                                fontStyle: "italic",
+                                color: "#718096", // Dark Gray Text
+                                marginTop: "18px",
+                                marginBottom: "18px",
+                                lineHeight: "1.8", // Added spacing
+                              }}
+                            >
+                              {props.children}
+                            </blockquote>
+                          ),
+                        }}
+                      >
+                        {result}
+                      </Markdown>
 
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
           </>
         )}
 
@@ -480,14 +536,34 @@ const Main = () => {
               }}
             />
             <div>
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                id="imageInput"
+                onChange={handleFileChange}
+              />
               <img
-                src={assets.send_icon}
-                alt=""
-                onClick={() => {
-                  onSent();
-                }}
+                src={assets.gallery_icon}
+                alt="Upload"
+                onClick={() => document.getElementById("imageInput").click()}
+                style={{ cursor: "pointer" }}
               />
             </div>
+            <div>
+              {
+                extracting ? (<p>Extracting Text..</p>) : (
+                  <img
+                    src={assets.send_icon}
+                    alt=""
+                    onClick={() => {
+                      onSent();
+                    }}
+                  />
+                )
+              }
+            </div>
+
           </div>
           <div className="bottom-info">
             <p>
